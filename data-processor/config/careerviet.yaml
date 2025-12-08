@@ -1,0 +1,195 @@
+# CareerViet Transformation Rules
+# Fill in patterns as you discover them from actual data
+
+platform_name: "CareerViet"
+platform_id: 3
+
+# ===========================================
+# SALARY PARSING
+# ===========================================
+salary:
+  # Processing method: "manual" or "ai"
+  method: "manual"
+  
+  # Manual patterns (fill in as you discover them)
+  patterns:
+    # Example pattern 1: Range with "Mil"
+    - regex: '(\d+(?:,\d+)?)\s*Mil\s*-\s*(\d+(?:,\d+)?)\s*Mil\s*(VND|USD)'
+      type: "range"
+      multiplier: 1000000
+      currency_group: 3
+      min_group: 1
+      max_group: 2
+      example: "5,0 Mil - 13 Mil VND"
+    
+    # Example pattern 2: "Thỏa thuận" (Negotiable)
+    - regex: 'Thỏa thuận|Negotiable'
+      type: "negotiable"
+      default_value: null
+      example: "Thỏa thuận"
+    
+    # TODO: Add more patterns as you find them
+    # - regex: 'YOUR_PATTERN_HERE'
+    #   type: "range|min|max|exact|negotiable"
+    #   example: "Example text"
+  
+  # AI fallback (if method=ai or manual patterns fail)
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Extract salary information from this text: "{text}"
+      Return JSON: {"min": number or null, "max": number or null, "currency": "VND|USD", "type": "range|min|max|negotiable"}
+  
+  default_currency: "VND"
+
+# ===========================================
+# EXPERIENCE LEVEL
+# ===========================================
+experience_level:
+  method: "manual"           # "manual" or "ai"
+  
+  mappings:
+    # Add your mappings here as you discover them
+    "Thực tập sinh": "Internship"
+    "Intern": "Internship"
+    # TODO: Add more as you find them
+    # "Pattern from website": "Target value (Internship|Entry|Mid|Senior|Lead|Executive)"
+  
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Map this experience level to one of: Internship, Entry, Mid, Senior, Lead, Executive
+      Input: "{text}"
+      Return only the mapped value.
+  
+  default: "Entry"
+
+# ===========================================
+# WORK TYPE
+# ===========================================
+work_type:
+  method: "manual"
+  
+  mappings:
+    "Full-time": "Full-time"
+    "Part-time": "Part-time"
+    # TODO: Add Vietnamese terms
+    # "Toàn thời gian": "Full-time"
+  
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Map this work type to one of: Full-time, Part-time, Contract, Seasonal
+      Input: "{text}"
+      Return only the mapped value.
+  
+  default: "Full-time"
+
+# ===========================================
+# LOCATION
+# ===========================================
+location:
+  method: "manual"
+  
+  # City name standardization
+  city_mappings:
+    "HCM": "Ho Chi Minh City"
+    "TP.HCM": "Ho Chi Minh City"
+    # TODO: Add more city variations
+  
+  # Country detection
+  country_patterns:
+    - regex: 'Vietnam|Việt Nam'
+      code: 'VNM'
+    # TODO: Add more countries
+  
+  default_country: 'VNM'
+  
+  # Remote/Hybrid detection
+  remote_keywords:
+    - "Remote"
+    - "WFH"
+    # TODO: Add Vietnamese terms
+  
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Extract location info from: "{text}"
+      Return JSON: {"city": "city name", "country_code": "ISO code", "is_remote": boolean}
+
+# ===========================================
+# JOB DESCRIPTION
+# ===========================================
+description:
+  method: "ai"               # Always use AI for descriptions
+  
+  # AI processing for description cleanup
+  ai_processing:
+    enabled: true
+    tasks:
+      - clean_html: true          # Remove HTML tags
+      - extract_requirements: true # Extract key requirements
+      - summarize: false          # Create summary (optional)
+    
+    prompt: |
+      Clean this job description, remove HTML, keep only relevant job info:
+      {text}
+      
+      Return JSON:
+      {
+        "cleaned_description": "cleaned text",
+        "key_requirements": ["req1", "req2", ...],
+        "benefits": ["benefit1", "benefit2", ...]
+      }
+
+# ===========================================
+# DATE PARSING
+# ===========================================
+date:
+  method: "manual"
+  
+  formats:
+    - "%d/%m/%Y"
+    - "%Y-%m-%d"
+    # TODO: Add formats as you discover them
+  
+  # Relative date patterns (e.g., "2 ngày trước")
+  relative:
+    - regex: '(\d+)\s*ngày trước'
+      unit: 'days'
+      example: "3 ngày trước"
+    # TODO: Add more patterns
+  
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Parse this date to YYYY-MM-DD format: "{text}"
+      Current date: {current_date}
+      Return only the date in YYYY-MM-DD format.
+
+# ===========================================
+# DATA QUALITY
+# ===========================================
+quality_checks:
+  required_fields:
+    - job_title
+    - url
+  
+  # Validation ranges
+  max_title_length: 500
+  max_salary: 1000000000    # Adjust based on your data
+  min_salary: 1000000
+  
+  # Spam detection
+  blacklist_keywords:
+    - "SCAM"
+    - "Test"
+    # TODO: Add spam patterns as you find them
+
+# ===========================================
+# NOTES
+# ===========================================
+# This is a TEMPLATE - fill in patterns as you analyze actual CareerViet data
+# Use method: "ai" for fields without clear patterns
+# Use method: "manual" for fields with consistent patterns
+# Enable ai_fallback as backup when manual patterns fail

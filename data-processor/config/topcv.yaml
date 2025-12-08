@@ -1,0 +1,44 @@
+# TopCV Transformation Rules - TEMPLATE
+
+platform_name: "TopCV"
+platform_id: 4
+
+salary:
+  method: "manual"
+  patterns: []                  # TODO: Analyze TopCV salary formats
+  ai_fallback:
+    enabled: true
+  default_currency: "VND"
+
+experience_level:
+  method: "manual"
+  mappings: {}
+  ai_fallback:
+    enabled: true
+  default: "Entry"
+
+work_type:
+  method: "manual"
+  mappings: {}
+  default: "Full-time"
+
+location:
+  method: "manual"
+  city_mappings: {}
+  default_country: 'VNM'
+
+description:
+  method: "ai"
+  ai_processing:
+    enabled: true
+
+date:
+  method: "manual"
+  formats: []
+  ai_fallback:
+    enabled: true
+
+quality_checks:
+  required_fields:
+    - job_title
+    - url

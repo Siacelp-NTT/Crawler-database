@@ -1,0 +1,49 @@
+# ITviec Transformation Rules - TEMPLATE
+# Fill in as you analyze ITviec data
+
+platform_name: "ITviec"
+platform_id: 5
+
+salary:
+  method: "manual"              # Change to "ai" if patterns are too complex
+  patterns: []                  # TODO: Fill in ITviec salary patterns
+  ai_fallback:
+    enabled: true
+  default_currency: "USD"
+
+experience_level:
+  method: "manual"
+  mappings: {}                  # TODO: Fill in ITviec experience mappings
+  ai_fallback:
+    enabled: true
+  default: "Entry"
+
+work_type:
+  method: "manual"
+  mappings: {}
+  default: "Full-time"
+
+location:
+  method: "manual"
+  city_mappings: {}
+  country_patterns: []
+  default_country: 'VNM'
+
+description:
+  method: "ai"                  # ITviec descriptions likely need AI
+  ai_processing:
+    enabled: true
+    tasks:
+      - clean_html: true
+      - extract_requirements: true
+
+date:
+  method: "manual"
+  formats: []                   # TODO: Add ITviec date formats
+  ai_fallback:
+    enabled: true
+
+quality_checks:
+  required_fields:
+    - job_title
+    - url

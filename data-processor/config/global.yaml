@@ -1,0 +1,79 @@
+# Global Data Processor Configuration
+
+# General Settings
+settings:
+  batch_size: 100
+  max_retries: 3
+  log_level: "info"
+  concurrent_processors: 3
+
+# AI Processing Settings
+ai:
+  enabled: true                      # Master switch for AI
+  provider: ""                 # gemini, claude, openai
+  model: ""         # Model name
+  max_tokens: 1000
+  temperature: 0.3
+  
+  # AI usage limits (cost control)
+  daily_limit: 10000                # Max AI calls per day
+  cost_per_call: 0.001              # Estimated cost in USD
+
+# Platform Registry
+platforms:
+  careerviet:
+    name: "CareerViet"
+    enabled: true
+    config_file: "config/careerviet.yaml"
+    processor_class: "CareerVietProcessor"
+    priority: 1
+  
+  linkedin:
+    name: "LinkedIn"
+    enabled: true
+    config_file: "config/linkedin.yaml"
+    processor_class: "LinkedInProcessor"
+    priority: 2
+  
+  itviec:
+    name: "ITviec"
+    enabled: false
+    config_file: "config/itviec.yaml"
+    processor_class: "ITviecProcessor"
+    priority: 3
+  
+  topcv:
+    name: "TopCV"
+    enabled: false
+    config_file: "config/topcv.yaml"
+    processor_class: "TopCVProcessor"
+    priority: 4
+  
+  vietnamworks:
+    name: "VietnamWorks"
+    enabled: false
+    config_file: "config/vietnamworks.yaml"
+    processor_class: "VietnamWorksProcessor"
+    priority: 5
+
+# Database Reference Tables (IDs from Clean DB schema.sql)
+reference_tables:
+  currencies:
+    VND: 1
+    USD: 2
+  
+  experience_levels:
+    Internship: 1
+    Entry: 2
+    Mid: 3
+    Senior: 4
+    Lead: 5
+    Executive: 6
+  
+  platforms:
+    LinkedIn: 1
+    Indeed: 2
+    Careerviet: 3
+    Topcv: 4
+    ItViec: 5
+    VietnamWorks: 6

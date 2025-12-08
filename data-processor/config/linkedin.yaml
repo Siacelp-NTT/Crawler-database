@@ -1,0 +1,102 @@
+# LinkedIn Transformation Rules
+
+platform_name: "LinkedIn"
+platform_id: 1
+
+salary:
+  method: "manual"
+  
+  patterns:
+    # Example: "$50,000 - $70,000/yr"
+    - regex: '\$(\d+(?:,\d+)?)\s*-\s*\$(\d+(?:,\d+)?)\s*/yr'
+      type: "range"
+      multiplier: 0.0833      # Convert yearly to monthly
+      currency: "USD"
+      min_group: 1
+      max_group: 2
+      example: "$50,000 - $70,000/yr"
+    
+    # TODO: Add more LinkedIn salary patterns
+  
+  ai_fallback:
+    enabled: true
+    prompt: |
+      Extract salary from: "{text}"
+      Return JSON: {"min": number, "max": number, "currency": "USD|VND"}
+  
+  default_currency: "USD"
+
+experience_level:
+  method: "manual"
+  
+  mappings:
+    "Internship": "Internship"
+    "Entry level": "Entry"
+    "Mid-Senior level": "Senior"
+    # TODO: Verify these with actual LinkedIn data
+  
+  ai_fallback:
+    enabled: true
+  
+  default: "Mid"
+
+work_type:
+  method: "manual"
+  
+  mappings:
+    "Full-time": "Full-time"
+    "Part-time": "Part-time"
+    "Contract": "Contract"
+  
+  default: "Full-time"
+
+location:
+  method: "manual"
+  
+  city_mappings:
+    "Ho Chi Minh City, Vietnam": "Ho Chi Minh City"
+    # TODO: Add more city variations
+  
+  country_patterns:
+    - regex: 'Vietnam'
+      code: 'VNM'
+    - regex: 'United States'
+      code: 'USA'
+  
+  default_country: 'USA'
+  
+  remote_keywords:
+    - "Remote"
+    - "Work from home"
+
+description:
+  method: "ai"
+  
+  ai_processing:
+    enabled: true
+    tasks:
+      - clean_html: true
+      - extract_requirements: true
+      - summarize: false
+
+date:
+  method: "manual"
+  
+  formats:
+    - "%Y-%m-%d"
+    - "%m/%d/%Y"
+  
+  relative:
+    - regex: '(\d+)\s*days? ago'
+      unit: 'days'
+  
+  ai_fallback:
+    enabled: true
+
+quality_checks:
+  required_fields:
+    - job_title
+    - url
+  max_title_length: 500
+  max_salary: 500000
+  min_salary: 1000

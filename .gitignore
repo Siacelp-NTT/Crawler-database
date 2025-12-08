@@ -1,0 +1,17 @@
+# D:\Projects\Crawler-database\.gitignore
+
+# Node.js (applies to ALL subdirectories)
+node_modules/
+*.log
+
+# Environment files (applies to ALL subdirectories)
+.env
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
