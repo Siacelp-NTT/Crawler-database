@@ -1,12 +1,19 @@
 # D:\Projects\Crawler-database\.gitignore
 
-# Node.js (applies to ALL subdirectories)
-node_modules/
-*.log
-
-# Environment files (applies to ALL subdirectories)
+# Environment variables
 .env
-*.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
 
 # OS files
 .DS_Store
@@ -15,3 +22,16 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Uploads
+raw-api/uploads/*
+!raw-api/uploads/.gitkeep
+
+# Analytics exports
+data-processor/analytics/exports/*
+!data-processor/analytics/exports/.gitkeep
+
+# PM2
+.pm2/
