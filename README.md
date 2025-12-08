@@ -138,10 +138,9 @@ npm run dashboard
 
 ## 📖 Detailed Documentation
 
-- [Database Setup Guide](./database-setup/README.md)
-- [Raw API Documentation](./raw-api/README.md)
+- [Raw API Documentation](./jobcrawler-raw-api/README.md)
 - [Data Processor Guide](./data-processor/README.md)
-- [Deployment Instructions](./DEPLOYMENT.md)
+- [Deployment Instructions](./instruction.md)
 
 ## 🔧 Configuration
 
