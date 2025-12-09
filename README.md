@@ -52,7 +52,7 @@ A comprehensive two-tier database system for web scraping job postings with auto
 - Optimized for analytics queries
 - Standardized data formats
 
-### 3. **Raw API** (`/raw-api/`)
+### 3. **Raw API** 
 - RESTful API for data insertion
 - Endpoints for job posts, companies, bulk uploads
 - CSV file upload support
@@ -214,7 +214,7 @@ Upload CSV file
 ### GET `/api/health`
 Health check
 
-See [API Documentation](./raw-api/README.md) for details.
+See [API Documentation](./jobcrawler-raw-api/README.md) for details.
 
 ## 🚀 Production Deployment
 
@@ -226,7 +226,6 @@ See [API Documentation](./raw-api/README.md) for details.
 6. **Setup Nginx** reverse proxy
 7. **Configure firewall**
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for step-by-step guide.
 
 ## 📈 System Status
 
