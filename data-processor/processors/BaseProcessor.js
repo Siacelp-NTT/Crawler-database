@@ -1,11 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const logger = require('../services/logger');
-const salaryParser = require('../utils/salary_parser');
-const experienceMapper = require('../utils/experience_mapper');
-const locationNormalizer = require('../utils/location_normalizer');
-const dateParser = require('../utils/date_parser');
-const aiProcessor = require('../services/ai_processor');
+const db = require('../services/database');
 
 class BaseProcessor {
   constructor(platformName, configFile) {
@@ -195,6 +191,164 @@ class BaseProcessor {
       failed: 0,
       errors: []
     };
+  }
+
+  /**
+   * Process a single raw job
+   * Must be implemented by child classes
+   */
+  async processJob(rawJob) {
+    throw new Error('processJob() must be implemented by child class');
+  }
+
+  /**
+   * Find or create company in clean database
+   * Returns company UUID
+   */
+  async findOrCreateCompany(companyName, companyUrl, companyLocation) {
+    try {
+      // Extract domain from URL
+      let domain = null;
+      if (companyUrl) {
+        try {
+          const url = new URL(companyUrl);
+          domain = url.hostname.replace('www.', '');
+        } catch (error) {
+          logger.warn(`Invalid company URL: ${companyUrl}`);
+        }
+      }
+
+      // Use the database service's duplicate-safe create
+      const companyId = await db.createCompany(
+        companyName,
+        domain,
+        companyLocation
+      );
+
+      return companyId;
+      
+    } catch (error) {
+      logger.error(`Error finding/creating company: ${companyName}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Insert job into clean database with duplicate checking
+   * Returns { created: boolean, jobId: UUID }
+   */
+  async insertCleanJob(jobData) {
+    try {
+      // Validate required fields
+      if (!jobData.company_id) {
+        throw new Error('company_id is required');
+      }
+      if (!jobData.title) {
+        throw new Error('title is required');
+      }
+      if (!jobData.post_url) {
+        throw new Error('post_url is required');
+      }
+
+      // Set platform ID
+      jobData.platform_id = this.platformId;
+
+      // Use the database service's duplicate-safe create
+      const result = await db.createJobPost(jobData);
+      
+      return result;
+      
+    } catch (error) {
+      logger.error(`Error inserting job: ${jobData.title}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Batch process multiple jobs
+   */
+  async batchProcess(rawJobs) {
+    const results = {
+      total: rawJobs.length,
+      processed: 0,
+      created: 0,
+      skipped: 0,
+      errors: 0,
+      processedJobIds: [],
+      errors_detail: []
+    };
+
+    logger.info(`Processing ${rawJobs.length} jobs from ${this.platformName}`);
+
+    for (const rawJob of rawJobs) {
+      try {
+        // Process the job
+        const cleanJob = await this.processJob(rawJob);
+
+        if (!cleanJob) {
+          logger.warn(`Processor returned null for job: ${rawJob.job_id}`);
+          results.errors++;
+          results.errors_detail.push({
+            job_id: rawJob.job_id,
+            title: rawJob.job_title,
+            error: 'Processor returned null'
+          });
+          continue;
+        }
+
+        // Insert into clean database with duplicate checking
+        const { created, jobId } = await this.insertCleanJob(cleanJob);
+
+        if (created) {
+          results.created++;
+          logger.info(`✅ Created job: ${cleanJob.title} (${jobId})`);
+        } else {
+          results.skipped++;
+          logger.info(`⏭️  Skipped duplicate: ${cleanJob.title} (${jobId})`);
+        }
+
+        results.processed++;
+        results.processedJobIds.push(rawJob.job_id);
+
+      } catch (error) {
+        results.errors++;
+        results.errors_detail.push({
+          job_id: rawJob.job_id,
+          title: rawJob.job_title,
+          error: error.message
+        });
+        logger.error(`Error processing job ${rawJob.job_id}:`, error);
+      }
+    }
+
+    // Mark processed jobs in raw database
+    if (results.processedJobIds.length > 0) {
+      await db.markJobsAsProcessed(results.processedJobIds);
+      logger.info(`Marked ${results.processedJobIds.length} jobs as processed in raw DB`);
+    }
+
+    return results;
+  }
+
+  /**
+   * Log processing results
+   */
+  logResults(results) {
+    logger.info('='.repeat(60));
+    logger.info(`${this.platformName} Processing Results:`);
+    logger.info(`  Total: ${results.total}`);
+    logger.info(`  Processed: ${results.processed}`);
+    logger.info(`  Created: ${results.created}`);
+    logger.info(`  Skipped (duplicates): ${results.skipped}`);
+    logger.info(`  Errors: ${results.errors}`);
+    logger.info('='.repeat(60));
+
+    if (results.errors > 0 && results.errors_detail.length > 0) {
+      logger.warn('Errors detail:');
+      results.errors_detail.forEach(err => {
+        logger.warn(`  - ${err.title}: ${err.error}`);
+      });
+    }
   }
 }
 
