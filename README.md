@@ -42,12 +42,12 @@ A comprehensive two-tier database system for web scraping job postings with auto
 
 ## 📦 Components
 
-### 1. **Raw Database** (`/database-setup/raw_db/`)
+### 1. **Raw Database** 
 - Fast insertion, flexible schema
 - Stores all scraped data as-is
 - Tracks processing status
 
-### 2. **Clean Database** (`/database-setup/clean_db/`)
+### 2. **Clean Database**
 - Normalized schema with foreign keys
 - Optimized for analytics queries
 - Standardized data formats
@@ -103,9 +103,8 @@ GRANT ALL PRIVILEGES ON DATABASE jobcrawler_db TO jobcrawler_user;
 
 ```bash
 # Run schema scripts
-psql -U jobcrawler_user -d jobcrawler_raw_db -f database-setup/raw_db/schema.sql
-psql -U jobcrawler_user -d jobcrawler_db -f database-setup/clean_db/schema.sql
-psql -U jobcrawler_user -d jobcrawler_db -f database-setup/clean_db/seed_data.sql
+psql -U jobcrawler_user -d jobcrawler_raw_db -f raw_schema.db
+psql -U jobcrawler_user -d jobcrawler_db -f schema.db
 ```
 
 #### 3. Setup Raw API
